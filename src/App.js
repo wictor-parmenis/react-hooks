@@ -1,15 +1,22 @@
-import React, {useState} from 'react'
+import React, {useState, useEffect} from 'react'
 
 export default function App (){
     // methods here
 
     const [subject, setSubject] = useState({
-        name: "",
+        name: "movies",
     });
 
-    const [articles, setArticles] = useState([
+    const [articles, setArticles] = useState(
 
-    ]);
+    );
+    
+    // This useEffect work when this component "articles" is updated;
+    useEffect(() => {
+        getArticles();
+        //console.log(articles)
+         setTimeout(()=>{document.title = articles;}, 4000);
+    }, [setArticles]); 
 
     async function getArticles() {
         const apiKey = '91474bc231824b629200d9975167be98';
@@ -17,42 +24,66 @@ export default function App (){
         const response = await fetch(url);
         const data = await response.json();
         const articlesJson = await data.articles;
-        for (var item of articlesJson){
+        // console.log(articlesJson);
+        setArticles([
+            articlesJson
+        ]);
+        /*for (var item of articlesJson){
             //console.log(item)
             setArticles([
                     ...articles, item
             ]);            
-        };
+        };*/
     };
 
-    function takeNews(e){
+    async function takeNews(e){
         e.preventDefault();
-        getArticles();
-        for (var article of articles){
-            console.log(article);
-        };
-    };
-    
-    
-    
+        await getArticles();
+        console.log(articles)
+        
+        /*
+        var n = 0;
+        while (n <= articles.length){
+            articles.map(article => {
+                console.log(article[n].title)
+                console.log(articles.length)
+            });
+            n += 1;
+        }*/
 
+        };
+    
+    
     return(
         <div>
-            <h2>Super News</h2>
-            <hr/>
+            <h1 style={{marginLeft: 1 + "em"}}>Super News</h1>
             <br/>
-            <form onSubmit={takeNews}>
+            <br/>
+            <form onSubmit={takeNews} style={{marginLeft: 2 + "em"}}>
                  <input placeholder="What about you want know today ?" 
-                 onChange={(e) => setSubject({name: e.target.value})}></input><br/>
-
+                 onChange={(e) => setSubject({name: e.target.value})}
+                 style={{width: 20 + "em", height: 2 + "em"}}></input><br/>
                  <button type="submit">Search</button>
             </form>
             <hr/>
-            {articles.map(article => (
-                <section className="article" key={article.title}>
-                    {article.title}
+            {articles !== undefined ?  articles.map(article => (
+                article.map(realContent => (
+                    <section className="article" key={article.title}
+                    style={{marginBottom: 2 + "em", margin: "auto", 
+                    width: 750 + "px"}}>
+                     <h2>{realContent.title}</h2> 
+                     <img src={realContent.urlToImage} style={{width: 480 + "px"}}/>
+                     <p> {article[1].content} </p>
+                     <span> <a href={realContent.url}>Read more</a></span>
+                     <hr/> 
                 </section>
-            ))}
+                
+                ))
+            )) : 
+            <section>
+                <p>Loading...</p>
+            </section>
+            }
         </div>
     )
 }
